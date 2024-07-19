@@ -47,3 +47,10 @@
   border: solid 1px rgb(255, 247, 237);
   background-color: rgb(255, 247, 237);
 }
+.playwrite  {
+    font-family: "Playfair Display", serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
+

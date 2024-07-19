@@ -39,7 +39,7 @@ function AñadirItems() {
         type="text"
         ref={newTaskRef}
         onKeyDown={postTask}
-        className="container"
+        className="container py-1 fs-3"
         placeholder="Añadir nueva tarea"
         id="inputPost"
       />
