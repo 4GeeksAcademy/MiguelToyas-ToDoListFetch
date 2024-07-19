@@ -1,12 +1,49 @@
+#bgAtras {
+  border: solid 1px;
+  border-top: none;
+  border-color: black;
+  min-width: 720px;
+  max-width: 720px;
+  box-shadow: 1px 15px 20px 1px rgb(200, 200, 200);
+  background-color: rgb(250, 236, 219);
+}
+#bgEnmedio {
+  border: solid 1px;
+  border-top: none;
+  border-color: black;
+  min-width: 725px;
+  max-width: 725px;
+  background-color: rgb(250, 236, 219);
+}
+#bgAdelante {
+  border: solid 1px;
+  border-color: black;
+  min-width: 730px;
+  max-width: 730px;
+  background-color: rgb(250, 236, 219);
+}
 
-/* 
+.task-item-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-    You can write your own styles here...
-    
-    
-    ...Or you can use the import command to include 
-    other sylesheets into your bunde as well, e.j:
-    
-    import 'relative/path/to/stylesheet.scss';
+.close-btn {
+  opacity: 0;
+  transition: opacity 0.3s;
+  border: none;
+  background-color: rgb(250, 236, 219);
+  font-size: 25px;
+  color: rgb(173, 173, 173);
+}
 
-*/
+.task-item-wrapper:hover .close-btn {
+  opacity: 1;
+}
+
+#inputPost {
+  border: solid 1px rgb(255, 247, 237);
+  background-color: rgb(255, 247, 237);
+}
