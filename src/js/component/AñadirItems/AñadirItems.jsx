@@ -4,55 +4,50 @@ import axios from "axios";
 function AñadirItems() {
   const [tasks, setTasks] = useState([]);
   const newTaskRef = useRef(null);
-  const enlace = "https://playground.4geeks.com/todo/user/alesanchezr";
+  const enlace = "https://playground.4geeks.com/todo/user/mitoperni";
 
   // Cargar tareas desde la base de datos cuando el componente se monte
   useEffect(() => {
     fetch(enlace, {
-      method: "PUT",
-      body: JSON.stringify(tasks),
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
-      },
+      }
     })
       .then((resp) => {
-        console.log(resp.ok); // Será true si la respuesta es exitosa
-        console.log(resp.status); // El código de estado 200, 300, 400, etc.
-        console.log(resp.text()); // Intentará devolver el resultado exacto como string
-        return resp.json(); // Intentará parsear el resultado a JSON y retornará una promesa donde puedes usar .then para seguir con la lógica
+        if (!resp.ok) {
+          throw new Error(`HTTP error! status: ${resp.status}`);
+        }
+        return resp.json();
       })
       .then((data) => {
-        // Aquí es donde debe comenzar tu código después de que finalice la búsqueda
         setTasks(data);
-        console.log(data); // Esto imprimirá en la consola el objeto exacto recibido del servidor
+        console.log(data);
       })
       .catch((error) => {
-        // Manejo de errores
-        console.log(error);
+        console.error('Error fetching data:', error);
       });
-  }, []);
+  }, [enlace]);
 
-  // // Guardar tareas en localStorage cada vez que cambien
-  // useEffect(() => {
-  //   localStorage.setItem("tasks", JSON.stringify(tasks));
-  // }, [tasks]);
-
-  // Funcion al postear nuevas tareas
   const postTask = async (e) => {
     e.preventDefault();
     if (e.key === "Enter") {
       const newTask = newTaskRef.current.value.trim();
       if (newTask !== "") {
         try {
-          const response = await axios.post(
-            enlace,
-            newTask
-          );
+          const response = await axios.post(enlace, {
+            label: newTask,
+            done: false,
+          }, {
+            headers: {
+              "Content-Type": "application/json",
+            }
+          });
           console.log("Cargado con exito");
-          console.loc(response)
-          
+          console.log(response.data);
+          setTasks([...tasks, response.data]);
+          newTaskRef.current.value = ""; 
         } catch (error) {
-          // Imprimir en terminal
           console.error("Error registrando la tarea:", error);
         }
       }
@@ -80,14 +75,14 @@ function AñadirItems() {
         {tasks.map((task, index) => (
           <div key={index} className="d-flex flex-column">
             <div className="task-item-wrapper">
-              <li className="fs-4 mb-2">{task}</li>
+              <li className="fs-4 mb-2">{task.label}</li>
               <button
                 type="button"
                 className="close-btn"
                 aria-label="Close"
                 onClick={() => deleteTask(index)}
               >
-                <i class="fa-solid fa-xmark"></i>
+                <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
             {index < tasks.length - 1 && <hr className="w-100 mx-auto" />}
