@@ -1,28 +1,60 @@
 import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
 
 function AñadirItems() {
   const [tasks, setTasks] = useState([]);
   const newTaskRef = useRef(null);
+  const enlace = "https://playground.4geeks.com/todo/user/alesanchezr";
 
-  // Cargar tareas desde localStorage cuando el componente se monte
+  // Cargar tareas desde la base de datos cuando el componente se monte
   useEffect(() => {
-    const savedTasks = JSON.parse(localStorage.getItem("tasks"));
-    if (savedTasks) {
-      setTasks(savedTasks);
-    }
+    fetch(enlace, {
+      method: "PUT",
+      body: JSON.stringify(tasks),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((resp) => {
+        console.log(resp.ok); // Será true si la respuesta es exitosa
+        console.log(resp.status); // El código de estado 200, 300, 400, etc.
+        console.log(resp.text()); // Intentará devolver el resultado exacto como string
+        return resp.json(); // Intentará parsear el resultado a JSON y retornará una promesa donde puedes usar .then para seguir con la lógica
+      })
+      .then((data) => {
+        // Aquí es donde debe comenzar tu código después de que finalice la búsqueda
+        setTasks(data);
+        console.log(data); // Esto imprimirá en la consola el objeto exacto recibido del servidor
+      })
+      .catch((error) => {
+        // Manejo de errores
+        console.log(error);
+      });
   }, []);
 
-  // Guardar tareas en localStorage cada vez que cambien
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
+  // // Guardar tareas en localStorage cada vez que cambien
+  // useEffect(() => {
+  //   localStorage.setItem("tasks", JSON.stringify(tasks));
+  // }, [tasks]);
 
-  const postTask = (e) => {
+  // Funcion al postear nuevas tareas
+  const postTask = async (e) => {
+    e.preventDefault();
     if (e.key === "Enter") {
       const newTask = newTaskRef.current.value.trim();
       if (newTask !== "") {
-        setTasks([...tasks, newTask]);
-        newTaskRef.current.value = "";
+        try {
+          const response = await axios.post(
+            enlace,
+            newTask
+          );
+          console.log("Cargado con exito");
+          console.loc(response)
+          
+        } catch (error) {
+          // Imprimir en terminal
+          console.error("Error registrando la tarea:", error);
+        }
       }
     }
   };
