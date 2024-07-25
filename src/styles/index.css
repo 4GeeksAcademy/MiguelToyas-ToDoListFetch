@@ -39,6 +39,13 @@
   color: rgb(173, 173, 173);
 }
 
+.deleteAll-btn {
+  border: none;
+  background-color: rgb(250, 236, 219);
+  font-size: 25px;
+  color: rgb(0, 0, 0);
+}
+
 .task-item-wrapper:hover .close-btn {
   opacity: 1;
 }

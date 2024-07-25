@@ -3,80 +3,86 @@ import React, { useState, useRef, useEffect } from "react";
 function AñadirItems() {
   const [tasks, setTasks] = useState([]);
   const newTaskRef = useRef(null);
-  const enlace = "https://playground.4geeks.com/todo/users/mitoperni";
 
   // Cargar tareas desde la base de datos cuando el componente se monte
   useEffect(() => {
-    fetch(enlace)
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error(`HTTP error! status: ${resp.status}`);
-        }
-        return resp.json();
-      })
+    fetch("https://playground.4geeks.com/todo/users/mitoperni")
+      .then((resp) => resp.json())
       .then((data) => {
-        setTasks(data); // Asegurarse de que data es un array
+        setTasks(data.todos);
       })
       .catch((error) => {
         console.log("Error al cargar tareas:", error);
       });
   }, []);
 
-  // Actualizar tareas en la base de datos
-  const updateTasks = (e) => {
-    e.preventDefault();
-    if (e.key === "Enter") {
-      const newTask = newTaskRef.current.value.trim();
-      if (newTask !== "") {
-        const updatedTasks = [...tasks, { label: newTask, done: false }];
-        setTasks(updatedTasks);
-        updateTasks(updatedTasks);
-        newTaskRef.current.value = "";
-      }
-    }
-
-
-
+  // Manejar la adición de nuevas tareas
+  const addTask = (task) => {
     fetch("https://playground.4geeks.com/todo/todos/mitoperni", {
       method: "POST",
-      body: JSON.stringify(updatedTasks),
+      body: JSON.stringify(task),
       headers: {
-        label: "tarea",
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
     })
-      .then((resp) => {
-        console.log(resp.ok); // Será true si la respuesta es exitosa
-        console.log(resp.status); // El código de estado 200, 300, 400, etc.
-        console.log(resp.text()); // Intentará devolver el resultado exacto como string
-        return resp.json(); // Intentará parsear el resultado a JSON y retornará una promesa donde puedes usar .then para seguir con la lógica
-      })
+      .then((response) => response.json())
       .then((data) => {
-        // Aquí es donde debe comenzar tu código después de que finalice la búsqueda
-        setTasks(data)
-        console.log(data);
-      }) 
-      .catch((error) => {
-        console.error("Error actualizando tareas:", error);
-      });
+        setTasks((prevTasks) => [...prevTasks, data]);
+      })
+      .catch((error) => console.error("Error:", error));
   };
 
-  const postTask = async (e) => {
-    e.preventDefault();
+  // Manejar el evento de la tecla Enter
+  const updateTasks = (e) => {
     if (e.key === "Enter") {
       const newTask = newTaskRef.current.value.trim();
       if (newTask !== "") {
-        const updatedTasks = [...tasks, { label: newTask, done: false }];
-        setTasks(updatedTasks);
-        updateTasks(updatedTasks);
+        const taskToSend = { label: newTask, is_done: false };
+        addTask(taskToSend);
         newTaskRef.current.value = "";
+        e.preventDefault();
       }
     }
   };
 
-  const deleteTask = (index) => {
-    const updatedTasks = tasks.filter((_, i) => i !== index);
-    setTasks(updatedTasks);
-    updateTasks(updatedTasks);
+  const deleteTask = (id) => {
+    fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+        } else {
+          console.error("Error al eliminar la tarea:", response.statusText);
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+  };
+
+  const deleteAllTasks = () => {
+    const deletePromises = tasks.map((task) =>
+      fetch(`https://playground.4geeks.com/todo/todos/${task.id}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+        },
+      })
+    );
+
+    Promise.all(deletePromises)
+      .then((responses) => {
+        const allOk = responses.every((response) => response.ok);
+        if (allOk) {
+          setTasks([]);
+        } else {
+          console.error("Error al eliminar todas las tareas.");
+        }
+      })
+      .catch((error) => console.error("Error:", error));
   };
 
   return (
@@ -84,7 +90,7 @@ function AñadirItems() {
       <input
         type="text"
         ref={newTaskRef}
-        onKeyDown={postTask}
+        onKeyDown={updateTasks}
         className="container py-1 fs-3"
         placeholder="Añadir nueva tarea"
         id="inputPost"
@@ -100,7 +106,7 @@ function AñadirItems() {
                   type="button"
                   className="close-btn"
                   aria-label="Close"
-                  onClick={() => deleteTask(index)}
+                  onClick={() => deleteTask(task.id)}
                 >
                   <i className="fa-solid fa-xmark"></i>
                 </button>
@@ -112,6 +118,10 @@ function AñadirItems() {
       <hr className="w-100" />
       <div className="d-flex justify-content-start align-items-center w-100">
         <p className="ms-5 my-2">{tasks.length} Tareas Pendientes</p>
+      </div>
+      <hr className="w-100" />
+      <div className="d-flex justify-content-center align-items-center w-100 mb-1">
+        <button type="button" className="deleteAll-btn my-2" onClick={deleteAllTasks}>¿Todas las tareas hechas? Pulsa aquí</button>
       </div>
     </div>
   );
